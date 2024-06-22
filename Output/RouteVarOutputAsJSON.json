@@ -1,0 +1,38 @@
+[
+   {
+      "routeId": 1,
+      "routeVarId": 101,
+      "routeVarName": "Route 1",
+      "routeVarShort": "R1",
+      "routeNo": "01",
+      "startStop": "Start 1",
+      "endStop": "End 1",
+      "distance": 10.0,
+      "outbound": true,
+      "runningTime": 30
+   },
+   {
+      "routeId": 2,
+      "routeVarId": 102,
+      "routeVarName": "Route 2",
+      "routeVarShort": "R2",
+      "routeNo": "02",
+      "startStop": "Start 2",
+      "endStop": "End 2",
+      "distance": 20.0,
+      "outbound": false,
+      "runningTime": 40
+   },
+   {
+      "routeId": 3,
+      "routeVarId": 103,
+      "routeVarName": "Route 3",
+      "routeVarShort": "R3",
+      "routeNo": "03",
+      "startStop": "Start 3",
+      "endStop": "End 3",
+      "distance": 15.0,
+      "outbound": true,
+      "runningTime": 35
+   }
+]
