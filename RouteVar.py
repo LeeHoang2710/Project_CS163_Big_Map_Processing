@@ -35,7 +35,7 @@ class RouteVar():
          else:
             setattr(self, key, value)
             print(f"Successfully changed {key} in RouteVar instance")
-      return True
+      
 
 
 #route = RouteVar(3, 5,"Lượt đi: Bến Thành - Thạnh Lộc","Thạnh Lộc", "03","Bến xe buýt Sài Gòn","THẠNH LỘC",21456,True,70)
@@ -73,7 +73,7 @@ class RouteVarQuery:
 
    def outputAsCSV(self, query_list):
       home_dir = os.getcwd()
-      filename = os.path.join(home_dir, "Output", "RouteVarOutputAsCSV.csv")
+      filename = os.path.join(home_dir, "Output/Route", "RouteVarOutputAsCSV.csv")
       # query_list: [ [{}, {}] ,  [{} , {}] , ... ]
       try:
          with open(filename, newline='', mode='w', encoding='utf-8') as csvfile:
@@ -93,7 +93,7 @@ class RouteVarQuery:
 
    def outputAsJSON(self, query_list):
       home_dir = os.getcwd()
-      filename = os.path.join(home_dir, "Output", "RouteVarOutputAsJSON.json")
+      filename = os.path.join(home_dir, "Output/Route", "RouteVarOutputAsJSON.json")
       # query_list: [ [{}, {}] ,  [{} , {}] , ... ]
       try:
          with open(filename, mode='w', encoding='utf-8') as jsonfile:
