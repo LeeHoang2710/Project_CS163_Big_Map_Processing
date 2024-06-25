@@ -53,3 +53,62 @@ class Graph():
       else:
           print(f'Can not go from {source} to {destination}')
 
+# forming the geojson file
+   def createGeoJson(self, coordinates):
+      if coordinates == []:
+         return None
+      start_point = coordinates[0]
+      end_point = coordinates[-1]
+
+      line_string_geometry = {
+         "type": "LineString",
+         "coordinates": coordinates
+      }
+      
+      start_point_geometry = {
+         "type": "Point",
+         "coordinates": start_point
+      }
+      
+      end_point_geometry = {
+         "type": "Point",
+         "coordinates": end_point
+      }
+
+      line_string_feature = {
+         "type": "Feature",
+         "geometry": line_string_geometry,
+         "properties": {
+               "Type": "LineString"
+         }
+      }
+      
+      start_point_feature = {
+         "type": "Feature",
+         "geometry": start_point_geometry,
+         "properties": {
+               "Type": "StartPoint"
+         }
+      }
+      
+      end_point_feature = {
+         "type": "Feature",
+         "geometry": end_point_geometry,
+         "properties": {
+               "Type": "EndPoint"
+         }
+      }
+
+      geojson_data = {
+         "type": "FeatureCollection",
+         "features": [line_string_feature, start_point_feature, end_point_feature]
+      }
+      
+      formatted_geojson = json.dumps(geojson_data, indent=4)
+      
+      file_path = os.path.join(os.getcwd(), "Output", "GeoJsonOutput.geojson")
+      with open(file_path, "w", encoding="utf-8") as file:
+         file.write(formatted_geojson)
+      
+      print("GeoJSON data has been formed and written to GeoJsonOutput.geojson file.")
+      return formatted_geojson
