@@ -3,8 +3,8 @@ import json
 import csv
 
 class Stop():
-   def __init__(self, StopId, Code, Name, StopType, Zone, Ward, AddressNo, Street, Status, Lng, Lat, Search, Routes):
-      self.stopid = StopId
+   def __init__(self, StopId, Code, Name, StopType, Zone, Ward, AddressNo, Street, SupportDisability, Status, Lng, Lat, Search, Routes, RouteId, RouteVarId):
+      self.stopId = StopId
       self.code = Code
       self.name = Name
       self.stopType = StopType
@@ -12,11 +12,15 @@ class Stop():
       self.ward = Ward
       self.address = AddressNo
       self.street = Street
+      self.supportDisability = SupportDisability
       self.status = Status
       self.lng = Lng
       self.lat = Lat
       self.search = Search
       self.routes = Routes
+
+      self.routeId = RouteId
+      self.routeVarId = RouteVarId
 
    def getStop(self, *argv):
       result = {}
@@ -39,10 +43,10 @@ class Stop():
 
 class StopQuery():
    def __init__(self):
-      self.stopquery = []
+      self.stops = []
    
    def searchByABC(self, **kwargs):
-      datas = self.stopquery
+      datas = self.stops
       searchStop = []
       try:
          for data in datas:
@@ -65,7 +69,7 @@ class StopQuery():
       # query_list: [ [{}, {}] ,  [{} , {}] , ... ]
       try:
          with open(filename, newline='', mode='w', encoding='utf-8') as csvfile:
-            fieldnames = ['stopId', 'code', 'name', 'stopType', 'zone', 'ward', 'address', 'street', 'status', 'lng', 'lat', 'search', 'routes']
+            fieldnames = ['stopId', 'code', 'name', 'stopType', 'zone', 'ward', 'address', 'street','supportDisability', 'status', 'lng', 'lat', 'search', 'routes', 'routeId', 'routeVarId']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             # write fieldnames to csv file
             writer.writeheader()
@@ -84,7 +88,7 @@ class StopQuery():
       # query_list: [ [{}, {}] ,  [{} , {}] , ... ]
       try:
          with open(filename, mode='w', encoding='utf-8') as jsonfile:
-             fieldnames = ['stopId', 'code', 'name', 'stopType', 'zone', 'ward', 'address', 'street', 'status', 'lng', 'lat', 'search', 'routes']
+             fieldnames = ['stopId', 'code', 'name', 'stopType', 'zone', 'ward', 'address', 'street','supportDisability', 'status', 'lng', 'lat', 'search', 'routes', 'routeId', 'routeVarId']
              all_data = []
              for sublist in query_list:
                 for element in sublist:
@@ -93,3 +97,25 @@ class StopQuery():
              jsonfile.write(json.dumps(all_data,ensure_ascii=False) + '\n')
       except Exception as e:
          print(f"Error with JSON: {e}")
+
+   def readStopData(self, file_path):
+      try:
+         with open(file_path, mode='r', newline="") as file:
+            data_list = [json.loads(line.strip()) for line in file]
+            data_stops = [data['Stops'] for data in data_list]
+            result = []
+            stop_dict = {}
+            # enumerate: (0, seq[0]),(1, seq[1]),(2, seq[2]), ...
+            for index, list_of_stops in enumerate(data_stops):
+               route_id = data_list[index]["RouteId"]
+               route_var_id = data_list[index]["RouteVarId"]
+               # ensure the dictionary structure valid {[], [], ...}
+               stop_dict.setdefault(route_id, {}).setdefault(route_var_id, [])
+               for stop in list_of_stops:
+                  stop_obj = Stop(**stop, RouteId=route_id, RouteVarId=route_var_id)
+                  result.append(stop_obj)
+                  stop_dict[route_id][route_var_id].append(stop_obj)
+            self.stops = result
+            return stop_dict
+      except FileNotFoundError:
+         raise FileNotFoundError("File not found:")

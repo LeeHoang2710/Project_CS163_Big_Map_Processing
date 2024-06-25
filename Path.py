@@ -60,6 +60,27 @@ class PathQuery():
                         all_data.append(element.getPath(*fieldnames))
                 jsonfile.write(json.dump(all_data, ensure_ascii=False) + '\n')
         except Exception as e:
-            print(f"Error with JSON: {e}")        
-            
+            print(f"Error with JSON: {e}")  
+
+    def readPathData(self, file_path):
+        try:
+            with open(file_path, mode='r') as file:
+                data_list = [json.loads(line.strip()) for line in file]
+                path_dict = {}
+                result = []
+                for data in data_list:  
+                    lat_data = data["lat"]
+                    lng_data = data["lng"]
+                    route_id = data["RouteId"]
+                    route_var_id = data["RouteVarId"]
+                    # combine two lists of lat and lng into 1 list containing tuples
+                    coordinate_data = [(lng, lat) for lat, lng in zip(lat_data, lng_data)]
+                    path_obj = Path(Coordinates=coordinate_data, RouteId=route_id, RouteVarId=route_var_id)
+                    path_dict.setdefault(route_id, {}).setdefault(route_var_id, [])
+                    result.append(path_obj)
+                    path_dict[route_id][route_var_id].append(path_obj)
+                self.paths = result
+                return path_dict
+        except FileNotFoundError:
+            raise FileNotFoundError("File not found:")    
          

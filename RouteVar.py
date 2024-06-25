@@ -38,14 +38,14 @@ class RouteVar():
       
 
 
-#route = RouteVar(3, 5,"Lượt đi: Bến Thành - Thạnh Lộc","Thạnh Lộc", "03","Bến xe buýt Sài Gòn","THẠNH LỘC",21456,True,70)
-#attribute = route.getRouteVar('routeId', 'endStop', 'routeVarShort')
-#update = route.setRouteVar(distance=15.0, runningTime=50)
-#print(attribute)
+# route = RouteVar(3, 5,"Lượt đi: Bến Thành - Thạnh Lộc","Thạnh Lộc", "03","Bến xe buýt Sài Gòn","THẠNH LỘC",21456,True,70)
+# attribute = route.getRouteVar('routeId', 'endStop', 'routeVarShort')
+# update = route.setRouteVar(distance=15.0, runningTime=50)
+# print(attribute['routeId'])
 #print(f"Updated distance: {route.distance}")
 #print(f"Updated running time: {route.runningTime}")
 
-class RouteVarQuery:
+class RouteVarQuery():
     # this class is a list of route vars
    def __init__(self):
       self.route_vars = []
@@ -107,16 +107,40 @@ class RouteVarQuery:
       except Exception as e:
          print(f"Error with JSON: {e}")
 
-route1 = RouteVar(1, 101, "Route 1", "R1", "01", "Start 1", "End 1", 10.0, True, 30)
-route2 = RouteVar(2, 102, "Route 2", "R2", "02", "Start 2", "End 2", 20.0, False, 40)
-route3 = RouteVar(3, 103, "Route 3", "R3", "03", "Start 3", "End 3", 15.0, True, 35)
+
+   def readRouteData(self, file_path):
+      try:
+         with open(file_path, mode='r') as file:
+            route_dict = {}
+            result = []
+            raw_data_list = [json.loads(line.strip()) for line in file]
+            # remove all empty list []
+            filtered_data_list = [data for data in raw_data_list if data != []]
+            for list_of_routes in filtered_data_list:
+               for data in list_of_routes:
+                  route_id = str(data["RouteId"])
+                  route_var_id = str(data["RouteVarId"])
+                  distance_km = float(data["Distance"] / 1000)
+                  time_h = float(data["RunningTime"] / 60)
+                  # Remove or rename the conflicting keys
+                  data.pop("Distance", None)
+                  data.pop("RunningTime", None)
+                  route_obj = RouteVar(**data, Distance=distance_km, RunningTime=time_h)
+                  route_dict.setdefault(route_id, {}).setdefault(route_var_id, [])
+                  result.append(route_obj)
+                  route_dict[route_id][route_var_id] = [distance_km, time_h]
+            self.route_vars = result
+            return route_dict
+      except FileNotFoundError:
+         raise FileNotFoundError("File not found:")
+      
 # add instances to RouteVarQuery
-query = RouteVarQuery()
-query.route_vars.append(route1)
-query.route_vars.append(route2)
-query.route_vars.append(route3)
+# query = RouteVarQuery()
+# query.route_vars.append(route1)
+# query.route_vars.append(route2)
+# query.route_vars.append(route3)
 # query.outputAsCSV([query.route_vars])
-query.outputAsJSON([query.route_vars])
+# query.outputAsJSON([query.route_vars])
 # use search function to find route
 # matching_routes = query.searchByABC(outbound=True, routeId=1)
 # if matching_routes == []: 
