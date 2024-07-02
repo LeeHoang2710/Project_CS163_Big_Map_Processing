@@ -30,15 +30,16 @@ bus_graph = Graph(stops=stop_nodes, edges=edges, coordinates = coodinates)
 print("......Handling edges complete.......")
 
 
-route_id = '81'
-var_id = '1'
-stopquery.stops = stop_dict[route_id][var_id]
-source = stopquery.searchByABC(stopId=1904)
-destination = stopquery.searchByABC(stopId=2360)
-print(source[0].name)
-print(destination[0].name)
-shortest_path = bus_graph.dijkstra(source[0], destination[0])
-print(shortest_path['path'])
-print(shortest_path['time'] * 60)
-print(shortest_path['distance'])
+# route_id = '81'
+# var_id = '1'
+# stopquery.stops = stop_dict[route_id][var_id]
+# source = stopquery.searchByABC(stopId=1904)
+# destination = stopquery.searchByABC(stopId=2360)
+# print(source[0].name)
+# print(destination[0].name)
+# shortest_path = bus_graph.dijkstra(source[0], destination[0])
+# print(shortest_path['path'])
+# print(shortest_path['time'] * 60)
+# print(shortest_path['distance'])
 
+bus_graph.dijkstraAllStops()

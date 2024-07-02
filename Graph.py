@@ -3,6 +3,7 @@ import json
 import math
 from Stop import Stop
 from Edge import Edge
+from datetime import datetime
 import heapq
 
 class Graph():
@@ -12,7 +13,35 @@ class Graph():
       self.coordinates = coordinates # dict
    
    # Dijkstra algorithm:
-   def dijkstra(self, source, destination):
+   def dijkstraOriginal(self, source):
+      time_dict = {stop: math.inf for stop in self.stops}
+      dist_dict = {stop: math.inf for stop in self.stops}
+      time_dict[source] = 0
+      dist_dict[source] = 0
+      prev = {stop: None for stop in self.stops}
+      priority_queue = []
+      heapq.heappush(priority_queue, (source, 0, 0))
+      while priority_queue:
+         curr_stop, curr_time, curr_dist = heapq.heappop(priority_queue)
+         if curr_time > time_dict[curr_stop] and curr_dist > dist_dict[curr_stop]:
+            continue
+         for edge in self.edges[curr_stop]:
+            time_to_go = edge.time
+            dist_to_go = edge.distance
+            new_time = time_dict[curr_stop] + time_to_go
+            new_distance = dist_dict[curr_stop] + dist_to_go
+            to_stop = edge.getEdge('to_stop')['to_stop'].stopId
+            if new_time < time_dict[to_stop] and new_distance < dist_dict[to_stop]:
+               time_dict[to_stop] = new_time
+               dist_dict[to_stop] = new_distance
+               prev[to_stop] = curr_stop
+               heapq.heappush(priority_queue, (to_stop, new_time, new_distance))
+      result = {stop: {'time': time_dict[stop], 'distance': dist_dict[stop]} for stop in self.stops}
+      return result
+
+
+
+   def dijkstraFindPath(self, source, destination):
       # initialize a time_dict with key-value is stopId-time
       time_dict = {stop: math.inf for stop in self.stops}
       # initialize a dist_dict with key-value is stopId-distance
@@ -58,6 +87,37 @@ class Graph():
             return result
       else:
           print(f'Can not go from {source.stopId} to {destination.stopId}')
+
+
+   def dijkstraAllStops(self):
+      start_time = datetime.now()
+      all_shortest_paths = {}
+      file_path = os.path.join(os.getcwd(), "Output", "AllShortestPaths.json")
+      count = 0
+      slowest = 0
+      fastest = math.inf
+      sum = 0
+      for stop in self.stops:
+         run_start = datetime.now()
+         result = self.dijkstraOriginal(stop)
+         run_end = datetime.now()
+         run_period = (run_end - run_start).total_seconds()
+         sum += run_period
+         slowest = max(slowest, run_period)
+         fastest = min(fastest, run_period)
+         all_shortest_paths[stop] = result
+         count += 1
+         print(f"____Processed {count} stop/total {len(self.stops)} stops____")
+      end_time = datetime.now()
+      total_time = (end_time - start_time).total_seconds()
+      with open(file_path, "w", encoding="utf-8") as file:
+         json.dump(all_shortest_paths, file, indent=4)
+      print("All shortest paths have been written to json file.")
+      print(f"Total time: {total_time} seconds") #Total time: 214.527972 seconds
+      print(f"Fastest time: {fastest} seconds") # Fastest time: 0.000511 seconds
+      print(f"Slowest time: {slowest} seconds") # Slowest time: 0.330803 seconds
+
+
 
 # forming the geojson file
    def createGeoJson(self, coordinates):
