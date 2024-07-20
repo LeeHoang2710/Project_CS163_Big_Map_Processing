@@ -121,14 +121,14 @@ class RouteVarQuery():
                   route_id = str(data["RouteId"])
                   route_var_id = str(data["RouteVarId"])
                   distance_km = float(data["Distance"] / 1000)
-                  time_h = float(data["RunningTime"] / 60)
+                  time = float(data["RunningTime"])
                   # Remove or rename the conflicting keys
                   data.pop("Distance", None)
                   data.pop("RunningTime", None)
-                  route_obj = RouteVar(**data, Distance=distance_km, RunningTime=time_h)
+                  route_obj = RouteVar(**data, Distance=distance_km, RunningTime=time)
                   route_dict.setdefault(route_id, {}).setdefault(route_var_id, [])
                   result.append(route_obj)
-                  route_dict[route_id][route_var_id] = [distance_km, time_h]
+                  route_dict[route_id][route_var_id] = [distance_km, time]
             self.route_vars = result
             return route_dict
       except FileNotFoundError:
