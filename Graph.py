@@ -108,29 +108,42 @@ class Graph():
 
 
    def dijkstraQuery(self, source, destination):
-      # initialize a dist_dict with key-value is stopId-distance
-      dist_dict = {stop: math.inf for stop in self.stops}
-      dist_dict[source] = 0
-      # prev = {stop: None for stop in self.stops}
-      priority_queue = []
-      heapq.heappush(priority_queue, (source, 0))
-      start_time = datetime.now()
-      while priority_queue:
-         curr_stop, curr_dist = heapq.heappop(priority_queue)
-         if curr_dist > dist_dict[curr_stop]:
-            continue
-         # iterate over the edges of current node
-         for edge in self.edges[curr_stop]:
-            new_distance = dist_dict[curr_stop] + edge.distance
-            to_stop = edge.getEdge('to_stop')['to_stop'].stopId
-            if new_distance < dist_dict[to_stop]:
-               dist_dict[to_stop] = new_distance
-               # prev[to_stop] = curr_stop
-               heapq.heappush(priority_queue, (to_stop, new_distance))
+        # Initialization
+        dist_dict = {stop: math.inf for stop in self.stops}
+        dist_dict[source] = 0
+        priority_queue = []
+        heapq.heappush(priority_queue, (0, source))
+        visited = set()
+        
+        start_time = datetime.now()
 
-      end_time = datetime.now()
-      total_time = (end_time - start_time).total_seconds()
-      return round(-1 if dist_dict[destination] == math.inf else dist_dict[destination], 4), total_time
+        while priority_queue:
+            curr_dist, curr_stop = heapq.heappop(priority_queue)
+            
+            # Early exit if destination is reached
+            if curr_stop == destination:
+                end_time = datetime.now()
+                total_time = (end_time - start_time).total_seconds()
+                return round(dist_dict[destination], 4), total_time
+            
+            # Skip processing if the node is already visited
+            if curr_stop in visited:
+                continue
+            visited.add(curr_stop)
+
+            # Relaxation of edges
+            for edge in self.edges[curr_stop]:
+                to_stop = edge.getEdge('to_stop')['to_stop'].stopId
+                new_distance = curr_dist + edge.distance
+                if new_distance < dist_dict[to_stop]:
+                    dist_dict[to_stop] = new_distance
+                    heapq.heappush(priority_queue, (new_distance, to_stop))
+
+        end_time = datetime.now()
+        total_time = (end_time - start_time).total_seconds()
+
+        # If the destination is not reachable, return -1
+        return round(-1 if dist_dict[destination] == math.inf else dist_dict[destination], 4), total_time
 
 
 

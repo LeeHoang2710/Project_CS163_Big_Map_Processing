@@ -109,8 +109,8 @@ print(f"Time taken for a query of CH: {sum1 / 10000} seconds")
 # print(f"Time taken for all queries of HL: {sum2} seconds")
 # print(f"Time taken for a query of HL: {sum2 / 10000} seconds")
 
-# print(f"Time taken for all queries of Normal: {sum3} seconds")
-# print(f"Time taken for a query of Normal: {sum3 / 10000} seconds")
+print(f"Time taken for all queries of Normal: {sum3} seconds")
+print(f"Time taken for a query of Normal: {sum3 / 10000} seconds")
 
 with(open('Output/ResultsCH.json', 'w')) as file:
    json.dump(resultsCH, file, ensure_ascii=False, indent=4)
@@ -120,8 +120,8 @@ with(open('Output/ResultsCH.json', 'w')) as file:
 #    json.dump(resultsHL, file, ensure_ascii=False, indent=4)
 #    print("Result file of HL created")
 
-# with(open('Output/ResultsNormal.json', 'w')) as file:
-#    json.dump(resultsNormal, file, ensure_ascii=False, indent=4)
-#    print("Result file of Normal created")
+with(open('Output/ResultsNormal.json', 'w')) as file:
+   json.dump(resultsNormal, file, ensure_ascii=False, indent=4)
+   print("Result file of Normal created")
 
-# checkResults('Output/ResultsCH.json', 'Output/ResultsNormal.json')
+checkResults('Output/ResultsCH.json', 'Output/ResultsNormal.json')
