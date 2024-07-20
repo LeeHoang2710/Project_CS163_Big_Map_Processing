@@ -1,14 +1,26 @@
 import math
+import json
 from Stop import *
 
 class Edge():
-   def __init__(self, from_stop, to_stop, coordinates_path, distance, time):
+   def __init__(self, from_stop, to_stop, name, coordinates_path, distance, time):
       self.from_stop = from_stop
       self.to_stop = to_stop
+      self.name = name
       self.coordinates = coordinates_path
       self.distance = distance
       self.time = time
 
+
+   def to_dict(self):
+        return {
+            'from_stop': self.from_stop.getStop('stopId')['stopId'], 
+            'to_stop': self.to_stop.getStop('stopId')['stopId'],
+            'name': self.name,
+            'coordinates': self.coordinates,
+            'distance': self.distance,
+            'time': self.time
+         }
    
    def getEdge(self, *argv):
       result = {}
@@ -69,6 +81,7 @@ class EdgesQuery():
 
    def handleData(self, stopquery, pathquery, route_dict, stop_dict):
       coordinates_dict = {}
+      counter = 0
       edges_dict = {stop.getStop('stopId')['stopId']:[] for stop in stopquery.stops}
       # {'stopId': []}
       for path in pathquery.paths:
@@ -85,6 +98,7 @@ class EdgesQuery():
             stop_from_id = stop_from.getStop('stopId')['stopId']
             stop_to = stops[i + 1]
             stop_to_id = stop_to.getStop('stopId')['stopId']
+            name = [stop_from.getStop('name')['name'], stop_to.getStop('name')['name']]
             
             lat_from = stop_from.getStop('lat')['lat']
             lng_from = stop_from.getStop('lng')['lng']
@@ -100,11 +114,38 @@ class EdgesQuery():
             time = distance / path_average_velocity
 
             # initialize a new edge from stop_from and stop_to
-            newEdge = Edge(stop_from, stop_to, coordinates_path, distance, time)
-            edges_dict[stop_from_id].append(newEdge)
             if stop_from_id not in coordinates_dict:
-               coordinates_dict[stop_from_id] = {}  # Initialize as empty dictionary
-            coordinates_dict[stop_from_id][stop_to_id] = coordinates_path
+               # Initialize as empty dictionary
+               coordinates_dict[stop_from_id] = {}
+               coordinates_dict[stop_from_id][stop_to_id] = coordinates_path
+               newEdge = Edge(stop_from, stop_to, name, coordinates_path, distance, time)
+               edges_dict[stop_from_id].append(newEdge)
+               counter += 1
+            else:
+               if stop_to_id not in coordinates_dict[stop_from_id]:
+                  coordinates_dict[stop_from_id][stop_to_id] = coordinates_path
+                  newEdge = Edge(stop_from, stop_to, name, coordinates_path, distance, time)
+                  edges_dict[stop_from_id].append(newEdge)
+                  counter += 1
+               else:
+                  existing_distance = self.edgesDistance(coordinates_dict[stop_from_id][stop_to_id])
+                  if distance < existing_distance:
+                     coordinates_dict[stop_from_id][stop_to_id] = coordinates_path
+                     # Find and update the existing edge in edges_dict
+                     for edge in edges_dict[stop_from_id]:
+                        if edge.to_stop.getStop('stopId')['stopId'] == stop_to_id:
+                            edge.coordinates = coordinates_path
+                            edge.distance = distance
+                            edge.time = time
+                            break
          self.edges = edges_dict
 
-      return edges_dict, coordinates_dict   
+
+
+      # edges_dict_serializable = {k: [edge.to_dict() for edge in v] for k, v in self.edges.items()}
+      # with open('./Output/Edges.json', 'w') as file:
+      #    json.dump(edges_dict_serializable, file, ensure_ascii=False, indent=4)
+      #    print(f"Edges data saved")
+      # print(f"Total number of edges: {counter}")
+      return edges_dict, coordinates_dict  
+   
