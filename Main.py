@@ -9,6 +9,7 @@ from Edge import *
 from Graph import *
 from HubLabeling import *
 from ContractionHierachies import *
+from TransitNodeRouting import *
 
 print("...........Handling data ...........")
 pathquery = PathQuery()
@@ -75,53 +76,59 @@ def checkResults(file1, file2):
 
 
 
-new_graph = ContractionHierachies(stops=stop_nodes, edges=edges, n=8000)
+new_graph = ContractionHierachies(stops=stop_nodes, edges=edges, n=7800)
 new_graph.buildNeighborsAndCosts()
-new_graph.preProcess()
-# result = new_graph.queryBidirectional(source=35, target=2189)
-# print(f"Shortest path from 718 to 704: {result}")
-# old_graph = HubLabeling(graph=bus_graph)
-# labels = old_graph.hubLabeling()
+vertices = new_graph.preProcess()
+print("......Contraction Hierachies complete......")
+result = new_graph.queryBidirectional(source=2, target=2755)
+print(f"Shortest path from 2 to 2755: {result[2]}")
+result = bus_graph.dijkstraQuery(source=2, destination=2755)
+print(f"Shortest path from 2 to 2755: {result[2]}")
 
-sum1 = 0
-sum2 = 0
-sum3 = 0
-resultsCH = []
-resultsHL = []
-resultsNormal = []
-for i in range(10000):
-   source = random.choice(stop_nodes)
-   destination = random.choice(stop_nodes)
-   while destination == source:
-      destination = random.choice(stop_nodes)
-   resultCH, time1 = new_graph.queryBidirectional(source=source, target=destination)
-   resultsCH.append([source, destination, resultCH])
-   sum1 += time1
-
-   resultNormal, time3 = bus_graph.dijkstraQuery(source, destination)
-   resultsNormal.append([source, destination, resultNormal])
-   sum3 += time3
+tnr_graph = TNRGraph(vertices=vertices, graph=new_graph)
+tnr_graph.computeTNR(count=100)
+result=tnr_graph.queryWithTNR(source=2, target=2755)
+print(f"Shortest path from 2 to 2755: {result[1]}")
 
 
-print(f"Time taken for all queries of CH: {sum1} seconds")
-print(f"Time taken for a query of CH: {sum1 / 10000} seconds")
+# sum1 = 0
+# sum2 = 0
+# count = 0
+# resultsCH = []
+# resultsNormal = []
+# for i in range(10000):
+#    source = random.choice(stop_nodes)
+#    destination = random.choice(stop_nodes)
+#    while destination == source:
+#       destination = random.choice(stop_nodes)
+#    result1, time1, path1 = new_graph.queryBidirectional(source=source, target=destination)
+#    resultsCH.append([source, destination, result1, path1])
+#    sum1 += time1
 
-# print(f"Time taken for all queries of HL: {sum2} seconds")
-# print(f"Time taken for a query of HL: {sum2 / 10000} seconds")
+#    result2, time2, path2 = bus_graph.dijkstraQuery(source, destination)
+#    resultsNormal.append([source, destination, result2, path2])
+#    sum2 += time2
 
-print(f"Time taken for all queries of Normal: {sum3} seconds")
-print(f"Time taken for a query of Normal: {sum3 / 10000} seconds")
+#    if path1 != path2:
+#       count += 1
 
-with(open('Output/ResultsCH.json', 'w')) as file:
-   json.dump(resultsCH, file, ensure_ascii=False, indent=4)
-   print("Result file of CH created")
 
-# with(open('Output/ResultsHL.json', 'w')) as file:
-#    json.dump(resultsHL, file, ensure_ascii=False, indent=4)
-#    print("Result file of HL created")
+# print(f"Time taken for all queries of CH: {sum1} seconds")
+# print(f"Time taken for a query of CH: {sum1 / 10000} seconds")
 
-with(open('Output/ResultsNormal.json', 'w')) as file:
-   json.dump(resultsNormal, file, ensure_ascii=False, indent=4)
-   print("Result file of Normal created")
 
-checkResults('Output/ResultsCH.json', 'Output/ResultsNormal.json')
+# print(f"Time taken for all queries of Normal: {sum2} seconds")
+# print(f"Time taken for a query of Normal: {sum2 / 10000} seconds")
+
+
+# with(open('Output/ResultsCH.json', 'w')) as file:
+#    json.dump(resultsCH, file, ensure_ascii=False, indent=4)
+#    print("Result file of CH created")
+
+
+# with(open('Output/ResultsNormal.json', 'w')) as file:
+#    json.dump(resultsNormal, file, ensure_ascii=False, indent=4)
+#    print("Result file of Normal created")
+
+# checkResults('Output/ResultsCH.json', 'Output/ResultsNormal.json')
+# print(f"Number of different paths: {count}")

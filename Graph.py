@@ -113,7 +113,9 @@ class Graph():
         dist_dict[source] = 0
         priority_queue = []
         heapq.heappush(priority_queue, (0, source))
+        prev = {stop: None for stop in self.stops}
         visited = set()
+        path = []
         
         start_time = datetime.now()
 
@@ -122,9 +124,7 @@ class Graph():
             
             # Early exit if destination is reached
             if curr_stop == destination:
-                end_time = datetime.now()
-                total_time = (end_time - start_time).total_seconds()
-                return round(dist_dict[destination], 4), total_time
+                break
             
             # Skip processing if the node is already visited
             if curr_stop in visited:
@@ -137,13 +137,22 @@ class Graph():
                 new_distance = curr_dist + edge.distance
                 if new_distance < dist_dict[to_stop]:
                     dist_dict[to_stop] = new_distance
+                    prev[to_stop] = curr_stop
                     heapq.heappush(priority_queue, (new_distance, to_stop))
 
+
+        if dist_dict[destination] != math.inf:
+            current = destination
+            while current != source:
+               path.append(current)
+               current = prev[current]
+            path.append(source)
+            path.reverse()
         end_time = datetime.now()
         total_time = (end_time - start_time).total_seconds()
 
         # If the destination is not reachable, return -1
-        return round(-1 if dist_dict[destination] == math.inf else dist_dict[destination], 4), total_time
+        return round(-1 if dist_dict[destination] == math.inf else dist_dict[destination], 4), total_time, path
 
 
 
