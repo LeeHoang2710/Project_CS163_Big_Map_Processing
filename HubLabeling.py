@@ -42,7 +42,7 @@ class HubLabeling:
    def hubLabeling(self):
       labels = {i: {'in': {}, 'out': {}, 'path': {}} for i in range(8000)}
 
-      start_time = datetime.now()
+      start_time = datetime.time()
       for stopId in self.graph.stops:
          dist_dict = self.dijkstra(stopId)
          for targetId, dist in dist_dict.items():
@@ -56,7 +56,7 @@ class HubLabeling:
                   #    path.append(currentId)
                   #    currentId = prev[currentId]
                   # labels[stopId]['path'][targetId] = path[::-1]
-      end_time = datetime.now()
+      end_time = datetime.time()
       print(f"Time taken for labeling: {(end_time - start_time).total_seconds()} seconds")
 
       return labels
@@ -65,7 +65,7 @@ class HubLabeling:
       source_labels = labels[source]['out']
       destination_labels = labels[destination]['in']
       
-      start_time = datetime.now()
+      start_time = datetime.time()
       shared_hubs = set(source_labels.keys()).intersection(set(destination_labels.keys()))
       shortest_dist = math.inf
       shortest_path = []
@@ -83,7 +83,7 @@ class HubLabeling:
       #    # Avoid duplicating the hub
       #    coordinates_path = [self.graph.coordinates[shortest_path[i]][shortest_path[i+1]] for i in range(len(shortest_path)-1)]
                
-      end_time = datetime.now()
+      end_time = datetime.time()
       total_time = (end_time - start_time).total_seconds()
       return -1 if shortest_dist == math.inf else shortest_dist, total_time
       # print(f"Time taken for query: {(end_time - start_time).total_seconds()} seconds")
